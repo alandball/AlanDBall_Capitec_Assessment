@@ -20,10 +20,10 @@ namespace FeedAPI.Services
         {
             try
             {
-                var users = ExtractUsersFromUserTxt(userTxtFileName);
-                var tweets = ExtractTweetsFromTweetTxt(tweetTxtFileName, users);
+                var users = GetUsersAndTheirFollowers(userTxtFileName);
+                var tweets = GetAllTweets(tweetTxtFileName, users);
 
-                //Print tweets for each user, if there are
+                //Print tweets for each user, if there are, as well as tweets for users this user has followed
                 foreach (var user in users.OrderBy(x => x.Name))
                 {
                     Console.WriteLine(user.Name);
@@ -63,7 +63,12 @@ namespace FeedAPI.Services
             }
         }
 
-        private List<User> ExtractUsersFromUserTxt(string userTxtFileName)
+        /// <summary>
+        /// Get all users and all the followers for each user
+        /// </summary>
+        /// <param name="userTxtFileName"></param>
+        /// <returns></returns>
+        public List<User> GetUsersAndTheirFollowers(string userTxtFileName)
         {
             _fileToRead = Enums.FileToRead.user;
             var lines = StringReader(userTxtFileName).ToList();
@@ -97,20 +102,45 @@ namespace FeedAPI.Services
                 }).ToList();
 
             // Map followers into User.Followers
-            foreach (var user in users)
-            {
-                user.Followers = followers.Where(x => x.UserIdsFollowed.Contains(user.Id)).ToList();
-            }
+            AddFollowerToUser(users, followers);
 
             return users;
         }
 
-        private List<Tweet> ExtractTweetsFromTweetTxt(string tweetTxtFileName, List<User> users)
+        /// <summary>
+        /// This api endpoint can add one or more followers to one or more users
+        /// </summary>
+        /// <param name="users"></param>
+        /// <param name="followers"></param>
+        public void AddFollowerToUser(List<User> users, List<Follower> followers)
+        {
+            foreach (var user in users)
+            {
+                user.Followers = followers.Where(x => x.UserIdsFollowed.Contains(user.Id)).ToList();
+            }
+        }
+
+        /// <summary>
+        /// This api endpoint deletes a follower from a user
+        /// </summary>
+        /// <param name="followerId"></param>
+        public void DeleteFollowerFromUser(int followerId)
+        {
+            //Implement code that will set IsDeleted to 1 in the database for this particular follower record
+        }
+
+        /// <summary>
+        /// Get all tweets
+        /// </summary>
+        /// <param name="tweetTxtFileName"></param>
+        /// <param name="users"></param>
+        /// <returns></returns>
+        public List<Tweet> GetAllTweets(string tweetTxtFileName, List<User> users)
         {
             _fileToRead = Enums.FileToRead.tweet;
             var lines = StringReader(tweetTxtFileName).ToList();
 
-            // Build list of users
+            // Build list of tweets
             return lines.Select(line =>
             {
                 var content = line.Substring(line.IndexOf(">", StringComparison.Ordinal) + 1, line.Length - line.IndexOf(">", StringComparison.Ordinal) - 1);
