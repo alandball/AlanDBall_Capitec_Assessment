@@ -20,13 +20,19 @@ namespace FeedAPI.Services
         {
             try
             {
-                _fileToRead = Enums.FileToRead.user;
-                var linesOfUserTxt = StringReader(userTxtFileName);
+                var users = ExtractUsersFromUserTxt(userTxtFileName);
+                var tweets = ExtractTweetsFromTweetTxt(tweetTxtFileName, users);
 
-                _fileToRead = Enums.FileToRead.tweet;
-                var linesOfTweetTxt = StringReader(tweetTxtFileName);
+                //Print tweets for each user, if there are
+                foreach (var user in users)
+                {
+                    Console.WriteLine(user.Name);
 
-                var users = ExtractUsersFromUserTxt(linesOfUserTxt.ToList());
+                    foreach (var tweet in tweets.Where(x => x.UserId == user.Id))
+                    {
+                        Console.WriteLine();
+                    }
+                }
             }
             catch (FileNotFoundException)
             {
@@ -53,14 +59,17 @@ namespace FeedAPI.Services
             }
         }
 
-        private List<User> ExtractUsersFromUserTxt(List<string> lines)
+        private List<User> ExtractUsersFromUserTxt(string userTxtFileName)
         {
+            _fileToRead = Enums.FileToRead.user;
+            var lines = StringReader(userTxtFileName).ToList();
+
             // Build list of users
             var names = lines.SelectMany(x => x.Replace(" follows", ",").Replace(" ", "").Split(',')).Distinct().ToList();
 
             var users = names.Select(name => new User
             {
-                Id = names.IndexOf(name),
+                Id = names.IndexOf(name) + 1,
                 Name = name
             }).ToList();
 
@@ -88,6 +97,27 @@ namespace FeedAPI.Services
             }
 
             return users;
+        }
+
+        private List<Tweet> ExtractTweetsFromTweetTxt(string tweetTxtFileName, List<User> users)
+        {
+            _fileToRead = Enums.FileToRead.tweet;
+            var lines = StringReader(tweetTxtFileName).ToList();
+
+            // Build list of users
+            return lines.Select(line =>
+            {
+                var content = line.Substring(line.IndexOf(">", StringComparison.Ordinal) + 1, line.Length - line.IndexOf(">", StringComparison.Ordinal) - 1);
+                var nameOfUserOfTweet = line.Substring(0, line.IndexOf(">", StringComparison.Ordinal));
+                var user = users.SingleOrDefault(x => x.Name.Equals(nameOfUserOfTweet));// Use SingleOrDefault as it is possible the file contains a tweet with a name of someone that isn't in the users file. So potentially null
+
+                return new Tweet
+                {
+                    Id = lines.IndexOf(line),
+                    Content = content,
+                    UserId = user?.Id
+                };
+            }).ToList();
         }
     }
 }
