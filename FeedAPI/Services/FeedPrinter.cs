@@ -53,21 +53,46 @@ namespace FeedAPI.Services
             }
         }
 
-        private List<User> ExtractUsersFromUserTxt(List<string> linesOfUserTxt)
+        private List<User> ExtractUsersFromUserTxt(List<string> lines)
         {
-            var users = linesOfUserTxt.SelectMany(x => x.Replace(" follows", ",").Replace(" ", "").Split(',')).Distinct()
-                .Select(x =>
-                {
-                    var followers = x.Substring(x.IndexOf(",", StringComparison.Ordinal) + 7, x.Length - x.IndexOf("follows", StringComparison.Ordinal) - 7).Replace(" ", "").Split(',');
+            // Build list of users
+            var names = lines.SelectMany(x => x.Replace(" follows", ",").Replace(" ", "").Split(',')).Distinct().ToList();
 
-                    return new User
-                    {
-                        Id = linesOfUserTxt.IndexOf(x) + 1,
-                        FirstName = x.Substring(0, x.IndexOf(" ", StringComparison.Ordinal))
-                    };
-                }).ToList();
+            var users = names.Select(name => new User
+            {
+                Id = names.IndexOf(name),
+                Name = name
+            }).ToList();
 
-            return users;
+            // Build list of followers
+            //var followers = lines.SelectMany(x => x.Substring(x.IndexOf(",", StringComparison.Ordinal) + 7, x.Length - x.IndexOf("follows", StringComparison.Ordinal) - 7).Replace(" ", "").Split(','))
+
+
+            var namesOfFollowers = lines.Select(x => x.Substring(0, x.IndexOf("follows", StringComparison.Ordinal))).Distinct().ToList();
+
+            var followers = namesOfFollowers
+            .Select(nameOfFollower => new Follower
+            {
+                Id = namesOfFollowers.IndexOf(nameOfFollower),
+                Name = nameOfFollower,
+                UserIdsFollowed = new List<int>()
+
+            }).ToList();
+
+
+
+            //var users = lines.SelectMany(x => x.Replace(" follows", ",").Replace(" ", "").Split(',')).Distinct()
+            //    .Select(x =>
+            //    {
+            //        return new User
+            //        {
+            //            Id = lines.IndexOf(x) + 1,
+            //            Name = x.Substring(0, x.IndexOf(" ", StringComparison.Ordinal)),
+            //            Followers = followers
+            //        };
+            //    }).ToList();
+
+            return new List<User>();
         }
     }
 }
