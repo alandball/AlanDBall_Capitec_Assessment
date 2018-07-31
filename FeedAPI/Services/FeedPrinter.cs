@@ -65,34 +65,29 @@ namespace FeedAPI.Services
             }).ToList();
 
             // Build list of followers
-            //var followers = lines.SelectMany(x => x.Substring(x.IndexOf(",", StringComparison.Ordinal) + 7, x.Length - x.IndexOf("follows", StringComparison.Ordinal) - 7).Replace(" ", "").Split(','))
-
-
             var namesOfFollowers = lines.Select(x => x.Substring(0, x.IndexOf("follows", StringComparison.Ordinal))).Distinct().ToList();
 
             var followers = namesOfFollowers
-            .Select(nameOfFollower => new Follower
+            .Select(nameOfFollower =>
+                {
+                    var linesWhereUserFollowed = lines.Where(line => line.Substring(0, line.IndexOf("follows", StringComparison.Ordinal)).Equals(nameOfFollower));
+                    var usersFollowed = linesWhereUserFollowed.SelectMany(line => line.Substring(line.IndexOf("follows", StringComparison.Ordinal) + 8, line.Length - line.IndexOf("follows", StringComparison.Ordinal) - 8).Replace(" ", "").Split(',')).Distinct().ToList();
+
+                    return new Follower
+                    {
+                        Id = namesOfFollowers.IndexOf(nameOfFollower),
+                        Name = nameOfFollower,
+                        UserIdsFollowed = usersFollowed.Select(x => users.Single(y => y.Name.Equals(x)).Id).ToList()
+                    };
+                }).ToList();
+
+            // Map followers into User.Followers
+            foreach (var user in users)
             {
-                Id = namesOfFollowers.IndexOf(nameOfFollower),
-                Name = nameOfFollower,
-                UserIdsFollowed = new List<int>()
+                user.Followers = followers.Where(x => x.UserIdsFollowed.Contains(user.Id)).ToList();
+            }
 
-            }).ToList();
-
-
-
-            //var users = lines.SelectMany(x => x.Replace(" follows", ",").Replace(" ", "").Split(',')).Distinct()
-            //    .Select(x =>
-            //    {
-            //        return new User
-            //        {
-            //            Id = lines.IndexOf(x) + 1,
-            //            Name = x.Substring(0, x.IndexOf(" ", StringComparison.Ordinal)),
-            //            Followers = followers
-            //        };
-            //    }).ToList();
-
-            return new List<User>();
+            return users;
         }
     }
 }
