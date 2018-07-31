@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using AlanDBall_Capitec_Assessment.Controllers;
 using AlanDBall_Capitec_Assessment.Models;
-using AlanDBall_Capitec_Assessment.Services.Interfaces;
+using FeedAPI.Controllers;
+using FeedAPI.Services.Interfaces;
 using Ninject;
-using System.Net.Http;
 
 namespace AlanDBall_Capitec_Assessment
 {
@@ -22,8 +21,8 @@ namespace AlanDBall_Capitec_Assessment
             var result = ValidateArgs(args);
             if ((result & ArgsValidationResult.Ok) == ArgsValidationResult.Ok)
             {
-                var twitterFeed = new TwitterFeedController(feedPrinter);
-                twitterFeed.PrintTwitterFeed();
+                var twitterFeed = new UserController(feedPrinter);
+                twitterFeed.PrintTwitterFeed(args[0], args[1]);
             }
             else
             {

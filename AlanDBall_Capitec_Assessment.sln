@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27703.2042
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlanDBall_Capitec_Assessment", "AlanDBall_Capitec_Assessment\AlanDBall_Capitec_Assessment.csproj", "{F6034DB5-9B18-4131-8418-FAF935CE340C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeedAPI", "FeedAPI\FeedAPI.csproj", "{4359FD5A-00F3-4E3B-8B79-3A70453B5010}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{F6034DB5-9B18-4131-8418-FAF935CE340C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6034DB5-9B18-4131-8418-FAF935CE340C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F6034DB5-9B18-4131-8418-FAF935CE340C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4359FD5A-00F3-4E3B-8B79-3A70453B5010}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4359FD5A-00F3-4E3B-8B79-3A70453B5010}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4359FD5A-00F3-4E3B-8B79-3A70453B5010}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4359FD5A-00F3-4E3B-8B79-3A70453B5010}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

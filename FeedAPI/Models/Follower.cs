@@ -1,0 +1,8 @@
+﻿namespace FeedAPI.Models
+{
+    class Follower
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+}
