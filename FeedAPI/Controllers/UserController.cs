@@ -3,7 +3,7 @@ using FeedAPI.Services.Interfaces;
 
 namespace FeedAPI.Controllers
 {
-    public class UserController
+    public class UserController : ApiController
     {
         private readonly IFeedPrinter _feedPrinter;
 
