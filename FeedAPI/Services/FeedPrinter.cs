@@ -24,13 +24,17 @@ namespace FeedAPI.Services
                 var tweets = ExtractTweetsFromTweetTxt(tweetTxtFileName, users);
 
                 //Print tweets for each user, if there are
-                foreach (var user in users)
+                foreach (var user in users.OrderBy(x => x.Name))
                 {
                     Console.WriteLine(user.Name);
 
-                    foreach (var tweet in tweets.Where(x => x.UserId == user.Id))
+                    var usersThisUserFollowed = users.Where(y => y.Followers.Select(z => z.UserId).Contains(user.Id)).ToList();
+                    var tweetsToPrint = tweets.Where(x => x.UserId == user.Id || usersThisUserFollowed.Select(y => y.Id).Contains(x.UserId)).ToList();
+
+                    foreach (var tweet in tweetsToPrint)
                     {
-                        Console.WriteLine();
+                        var userNameOfTweet = users.Single(x => x.Id == tweet.UserId).Name;
+                        Console.WriteLine($"\t@{userNameOfTweet}: {tweet.Content}");
                     }
                 }
             }
@@ -74,17 +78,19 @@ namespace FeedAPI.Services
             }).ToList();
 
             // Build list of followers
-            var namesOfFollowers = lines.Select(x => x.Substring(0, x.IndexOf("follows", StringComparison.Ordinal))).Distinct().ToList();
+            var namesOfFollowers = lines.Select(x => x.Substring(0, x.IndexOf("follows", StringComparison.Ordinal) - 1)).Distinct().ToList();
 
             var followers = namesOfFollowers
             .Select(nameOfFollower =>
                 {
-                    var linesWhereUserFollowed = lines.Where(line => line.Substring(0, line.IndexOf("follows", StringComparison.Ordinal)).Equals(nameOfFollower));
+                    var linesWhereUserFollowed = lines.Where(line => line.Substring(0, line.IndexOf("follows", StringComparison.Ordinal) - 1).Equals(nameOfFollower));
                     var usersFollowed = linesWhereUserFollowed.SelectMany(line => line.Substring(line.IndexOf("follows", StringComparison.Ordinal) + 8, line.Length - line.IndexOf("follows", StringComparison.Ordinal) - 8).Replace(" ", "").Split(',')).Distinct().ToList();
+                    var user = users.Single(x => x.Name.Equals(nameOfFollower));
 
                     return new Follower
                     {
-                        Id = namesOfFollowers.IndexOf(nameOfFollower),
+                        Id = namesOfFollowers.IndexOf(nameOfFollower) + 1,
+                        UserId = user.Id,
                         Name = nameOfFollower,
                         UserIdsFollowed = usersFollowed.Select(x => users.Single(y => y.Name.Equals(x)).Id).ToList()
                     };
@@ -113,9 +119,9 @@ namespace FeedAPI.Services
 
                 return new Tweet
                 {
-                    Id = lines.IndexOf(line),
+                    Id = lines.IndexOf(line) + 1,
                     Content = content,
-                    UserId = user?.Id
+                    UserId = user?.Id ?? 0
                 };
             }).ToList();
         }
